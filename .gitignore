@@ -11,3 +11,5 @@ wheels/
 .env
 
 cookies.json
+metadata
+downloads

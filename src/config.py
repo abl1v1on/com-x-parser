@@ -15,8 +15,17 @@ class LoginSettings(BaseModel):
     cookies_path: Path = BASE_DIR / "cookies.json"
 
 
+class DownloaderSettings(BaseModel):
+    full_chapter_id_url: str = (
+        "/engine/ajax/controller.php?"
+        "mod=api&action=chapters/download"
+    )
+    download_chapter_url: str = "https://rus.com-x.life/download"
+    download_dir: Path = BASE_DIR / "downloads"
+
 class Settings(BaseSettings):
     login: LoginSettings
+    downloader: DownloaderSettings = DownloaderSettings()
 
     model_config = SettingsConfigDict(
         env_file=".env",

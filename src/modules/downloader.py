@@ -81,6 +81,7 @@ class Downloader:
                 )
                 tasks.append(task)
             await asyncio.gather(*tasks)
+        self._show_result(len(full_chapter_ids))
 
     async def download_single_chapter(
         self,
@@ -100,6 +101,7 @@ class Downloader:
         response: Response
     ) -> None:
         filename = self._get_filename(response)
+        print(f"Downloading {filename}")
 
         async with aiofiles.open(
             settings.downloader.download_dir / filename, 
@@ -121,3 +123,13 @@ class Downloader:
         headers = response.headers
         disposition = headers["content-disposition"]
         return disposition.split("=")[-1].replace('"', "")
+
+    @staticmethod
+    def _show_result(total: int) -> None:
+        files_count = len(
+            [
+                _ for _ in 
+                settings.downloader.download_dir.iterdir()
+            ]
+        )
+        print(f"Установлено {files_count} из {total} файлов!")

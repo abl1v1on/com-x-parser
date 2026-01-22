@@ -1,6 +1,6 @@
 import json
 
-import httpx
+import requests
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
@@ -8,8 +8,8 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.common.exceptions import NoSuchElementException
 from webdriver_manager.chrome import ChromeDriverManager
 
-from utils import ask
 from config import settings
+from utils import ask, get_user_agent
 
 
 class Parser:
@@ -46,25 +46,7 @@ class Parser:
     def collect_metadata(self) -> None:
         settings.metadata_path.mkdir(exist_ok=True)
         
-        poster_url = str(self.poster.get_attribute("src"))
-
-        # TODO: fix poster saving
-
-        with httpx.Client(
-            base_url=poster_url,
-            headers={
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
-                "Host": "com-x.life",
-                "Cache-Control": "no-cache",
-            },
-        ) as client:
-            response = client.get("")
-
-            with open(
-                settings.metadata_path / "poster.jpg", 
-                mode="wb"
-            ) as file:
-                file.write(response.content)
+        self._save_poster()
 
         with open(
             settings.metadata_path / "data.json", 
@@ -152,3 +134,18 @@ class Parser:
         service = Service(ChromeDriverManager().install())
         driver = Chrome(service=service)
         return driver
+
+    def _save_poster(self) -> None:
+        poster_url = str(self.poster.get_attribute("src"))
+        response = requests.get(
+            url=poster_url,
+            headers={
+                "User-Agent": get_user_agent(),
+            },
+        )
+
+        with open(
+            settings.metadata_path / "poster.jpg", 
+            mode="wb",
+        ) as file:
+            file.write(response.content)

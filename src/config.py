@@ -20,12 +20,17 @@ class DownloaderSettings(BaseModel):
         "/engine/ajax/controller.php?"
         "mod=api&action=chapters/download"
     )
-    download_chapter_url: str = "https://rus.com-x.life/download"
+    download_chapter_url: str = (
+        "https://rus.com-x.life/download"
+    )
     download_dir: Path = BASE_DIR / "downloads"
+
 
 class Settings(BaseSettings):
     login: LoginSettings
     downloader: DownloaderSettings = DownloaderSettings()
+
+    metadata_path: Path = BASE_DIR / "metadata"
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -35,4 +40,3 @@ class Settings(BaseSettings):
 
 
 settings = Settings() # type: ignore
-

@@ -30,18 +30,23 @@ class Parser:
                 
                 self.to_next_page.click()
             except NoSuchElementException:
+                self.driver.quit()
                 break
         return chapter_ids
 
     @property
     def to_chapters_btn(self) -> WebElement:
         return self._find(
-            By.CSS_SELECTOR, "[data-tab='chapters']"
+            By.CSS_SELECTOR, 
+            "[data-tab='chapters']",
         ) # type: ignore
 
     @property
     def show_from_first_chapter_btn(self) -> WebElement:
-        return self._find(By.CSS_SELECTOR, ".cl__action") # type: ignore
+        return self._find(
+            By.CSS_SELECTOR, 
+            ".cl__action",
+        ) # type: ignore
 
     @property
     def chapters_on_page(self) -> list[WebElement]:
@@ -53,7 +58,10 @@ class Parser:
 
     @property
     def to_next_page(self) -> WebElement:
-        return self._find(By.XPATH, "//a[text()='Вперед']") # type: ignore
+        return self._find(
+            By.XPATH, 
+            "//a[text()='Вперед']",
+        ) # type: ignore
 
     def _find(
         self, 

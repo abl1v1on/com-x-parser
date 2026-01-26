@@ -22,7 +22,7 @@ class Downloader:
 
             for chapter_id in chapter_ids:
                 task = asyncio.create_task(
-                    self.get_signle_full_chapter_id(
+                    self.get_single_full_chapter_id(
                         client=client,
                         news_id=news_id,
                         cookies=cookies,
@@ -36,7 +36,7 @@ class Downloader:
         return full_chapter_ids
 
     @staticmethod
-    async def get_signle_full_chapter_id(
+    async def get_single_full_chapter_id(
         client: AsyncClient,
         news_id: str,
         cookies: dict,
@@ -89,12 +89,18 @@ class Downloader:
         full_chapter_id: str,
         semaphore: asyncio.Semaphore,
     ) -> None:
-        async with semaphore:
-            async with client.stream(
-                "GET", f"/{full_chapter_id}",
-            ) as response:
-                response.raise_for_status()
-                await self._write_content_to_file(response)
+        try:
+            async with semaphore:
+                async with client.stream(
+                    "GET", f"/{full_chapter_id}",
+                ) as response:
+                    response.raise_for_status()
+                    await self._write_content_to_file(response)
+        except Exception as e:
+            print(
+                "Ошибка при запросе на загрузку "
+                f"главы (ID {full_chapter_id}): {e}"
+            )
 
     async def _write_content_to_file(
         self, 
@@ -103,12 +109,17 @@ class Downloader:
         filename = self._get_filename(response)
         print(f"Downloading {filename}")
 
-        async with aiofiles.open(
-            settings.downloader.download_dir / filename, 
-            mode="wb"
-        ) as file:
-            async for chunk in response.aiter_bytes():
-                await file.write(chunk)
+        try:
+            async with aiofiles.open(
+                settings.downloader.download_dir / filename, 
+                mode="wb"
+            ) as file:
+                async for chunk in response.aiter_bytes():
+                    await file.write(chunk)
+        except Exception as e:
+            print(
+                f"Ошибка при сохранении файла {filename}: {e}"
+            )
 
     @staticmethod
     async def _get_cookies() -> dict:

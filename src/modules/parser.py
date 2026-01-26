@@ -53,6 +53,7 @@ class Parser:
             mode="w",
             encoding="utf-8",
         ) as file:
+            manga_name = self.manga_name.text
             clean_tags = [
                 tag.text.capitalize() 
                 for tag in self.tags
@@ -60,6 +61,7 @@ class Parser:
 
             content = json.dumps(
                 {
+                    "name": manga_name,
                     "description": self.description.text,
                     "tags": clean_tags,
                 },
@@ -95,6 +97,13 @@ class Parser:
         return self._find(
             By.XPATH, 
             "//a[text()='Вперед']",
+        ) # type: ignore
+
+    @property
+    def manga_name(self) -> WebElement:
+        return self._find(
+            By.CSS_SELECTOR, 
+            ".page__header h1"
         ) # type: ignore
 
     @property

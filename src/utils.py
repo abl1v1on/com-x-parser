@@ -1,3 +1,7 @@
+from tkinter.filedialog import askdirectory
+from tkinter.messagebox import showinfo
+from pathlib import Path
+
 from fake_useragent import UserAgent
 
 
@@ -11,3 +15,11 @@ def ask(question: str) -> bool:
 
 def get_user_agent() -> str:
     return UserAgent().random
+
+
+def get_download_folder() -> Path:
+    showinfo(
+        "Директория для установки", 
+        "Выберите директорию для установки",
+    )
+    return Path(askdirectory())

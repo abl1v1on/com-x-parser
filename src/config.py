@@ -5,6 +5,8 @@ from pydantic_settings import (
     SettingsConfigDict,
 )
 
+from utils import get_download_folder
+
 
 BASE_DIR = Path(__file__).parent.parent
 
@@ -23,14 +25,16 @@ class DownloaderSettings(BaseModel):
     download_chapter_url: str = (
         "https://rus.com-x.life/download"
     )
-    download_dir: Path = BASE_DIR / "downloads"
+    download_dir: Path = get_download_folder()
 
 
 class Settings(BaseSettings):
     login: LoginSettings
     downloader: DownloaderSettings = DownloaderSettings()
 
-    metadata_path: Path = BASE_DIR / "metadata"
+    @property
+    def metadata_path(self) -> Path:
+        return self.downloader.download_dir / "metadata"
 
     model_config = SettingsConfigDict(
         env_file=".env",

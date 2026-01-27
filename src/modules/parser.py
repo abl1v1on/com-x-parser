@@ -5,6 +5,7 @@ import requests
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.common.exceptions import NoSuchElementException
 from webdriver_manager.chrome import ChromeDriverManager
@@ -155,7 +156,15 @@ class Parser:
     @staticmethod
     def _init_driver() -> Chrome:
         service = Service(ChromeDriverManager().install())
-        driver = Chrome(service=service)
+        options = Options()
+        
+        for option in settings.driver.chrome_options:
+            options.add_argument(option)
+
+        for option in settings.driver.chrome_experimental_options:
+            options.add_experimental_option(*option)
+
+        driver = Chrome(service=service, options=options)
         return driver
 
     def _save_poster(self) -> None:

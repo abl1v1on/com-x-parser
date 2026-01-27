@@ -1,9 +1,13 @@
 import json
+import logging
 
 import aiofiles
 
 from . import get_client
 from config import settings
+
+
+logger = logging.getLogger(__name__)
 
 
 class AuthModule:
@@ -14,6 +18,8 @@ class AuthModule:
                 "login_password": settings.login.password,
                 "login": "submit",
             }
+
+            logger.info("Send response to get auth cookies")
             response = await client.post(
                 "/home", 
                 data=form_data
@@ -45,5 +51,9 @@ class AuthModule:
                 cookies, 
                 indent=2, 
                 ensure_ascii=False,
+            )
+            logger.info(
+                "Write auth cookies to "
+                f"{settings.login.cookies_path}"
             )
             await file.write(content)

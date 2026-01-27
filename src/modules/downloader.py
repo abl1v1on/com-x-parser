@@ -1,11 +1,15 @@
 import json
 import asyncio
+import logging
 
 import aiofiles
 from httpx import AsyncClient, Response
 
 from . import get_client
 from config import settings
+
+
+logger = logging.getLogger(__name__)
 
 
 class Downloader:
@@ -20,6 +24,7 @@ class Downloader:
             semaphore = asyncio.Semaphore(10)
             tasks = []
 
+            logger.info("Start full chapter IDs collecting")
             for chapter_id in chapter_ids:
                 task = asyncio.create_task(
                     self.get_single_full_chapter_id(
@@ -33,6 +38,8 @@ class Downloader:
                 tasks.append(task)
 
             full_chapter_ids = await asyncio.gather(*tasks)
+        
+        logger.info("Chapter IDs collected")
         return full_chapter_ids
 
     @staticmethod
@@ -44,6 +51,10 @@ class Downloader:
         semaphore: asyncio.Semaphore,
     ) -> str:
         async with semaphore:
+            logger.info(
+                "Send response to get "
+                f"full id for {chapter_id}"
+            )
             response = await client.post(
                 settings.downloader.full_chapter_id_url,
                 json={
@@ -71,6 +82,7 @@ class Downloader:
                 exist_ok=True
             )
 
+            logger.info("Start downloading chapters")
             for chapter_id in full_chapter_ids:
                 task = asyncio.create_task(
                     self.download_single_chapter(
@@ -81,6 +93,8 @@ class Downloader:
                 )
                 tasks.append(task)
             await asyncio.gather(*tasks)
+        
+        logger.info("Chapters downloaded")
         self._show_result(len(full_chapter_ids))
 
     async def download_single_chapter(
@@ -91,15 +105,19 @@ class Downloader:
     ) -> None:
         try:
             async with semaphore:
+                logger.info(
+                    "Send response to download "
+                    f"chapter with id {full_chapter_id}"
+                )
                 async with client.stream(
                     "GET", f"/{full_chapter_id}",
                 ) as response:
                     response.raise_for_status()
                     await self._write_content_to_file(response)
         except Exception as e:
-            print(
-                "Ошибка при запросе на загрузку "
-                f"главы (ID {full_chapter_id}): {e}"
+            logger.error(
+                "Error when requesting to download "
+                f"chapter {full_chapter_id}: {e}"
             )
 
     async def _write_content_to_file(
@@ -107,19 +125,20 @@ class Downloader:
         response: Response
     ) -> None:
         filename = self._get_filename(response)
-        print(f"Downloading {filename}")
 
         try:
             async with aiofiles.open(
                 settings.downloader.download_dir / filename, 
                 mode="wb"
             ) as file:
+                logger.info(
+                    f"Write {filename} to "
+                    f"{settings.downloader.download_dir}"
+                )
                 async for chunk in response.aiter_bytes():
                     await file.write(chunk)
         except Exception as e:
-            print(
-                f"Ошибка при сохранении файла {filename}: {e}"
-            )
+            logger.error(f"Error when saving {filename}: {e}")
 
     @staticmethod
     async def _get_cookies() -> dict:
@@ -144,4 +163,7 @@ class Downloader:
                 if item.is_file()
             ]
         )
-        print(f"Установлено {files_count} из {total} файлов!")
+        logging.info(
+            f"\033[32m{files_count} out of "
+            f"{total} files installed\033[0m"
+        )

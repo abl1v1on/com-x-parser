@@ -1,4 +1,5 @@
 import json
+import logging
 
 import requests
 from selenium.webdriver import Chrome
@@ -10,6 +11,9 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 from config import settings
 from utils import ask, get_user_agent
+
+
+logger = logging.getLogger(__name__)
 
 
 class Parser:
@@ -30,6 +34,7 @@ class Parser:
 
         chapter_ids = []
 
+        logger.info("Start chapter IDs collecting")
         while True:
             try:
                 for chapter in self.chapters_on_page:
@@ -41,9 +46,12 @@ class Parser:
             except NoSuchElementException:
                 self.driver.quit()
                 break
+        
+        logger.info("Chapter IDs collected")
         return chapter_ids
 
     def collect_metadata(self) -> None:
+        logger.info("Start metadata collecting")
         settings.metadata_path.mkdir(exist_ok=True)
         
         self._save_poster()
@@ -68,7 +76,13 @@ class Parser:
                 indent=2,
                 ensure_ascii=False,
             )
+
+            logger.info(
+                "Write manga info to "
+                f"{settings.metadata_path / "data.json"}"
+            )
             file.write(content)
+        logger.info("Metadata collected")
 
     @property
     def to_chapters_btn(self) -> WebElement:
@@ -146,6 +160,8 @@ class Parser:
 
     def _save_poster(self) -> None:
         poster_url = str(self.poster.get_attribute("src"))
+
+        logger.info("Send response to get manga poster")
         response = requests.get(
             url=poster_url,
             headers={
@@ -157,4 +173,8 @@ class Parser:
             settings.metadata_path / "poster.jpg", 
             mode="wb",
         ) as file:
+            logger.info(
+                "Write poster to "
+                f"{settings.metadata_path / "poster.jpg"}"
+            )
             file.write(response.content)

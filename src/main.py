@@ -1,4 +1,5 @@
 import asyncio
+import tkinter as tk
 
 from utils import ask
 from config import settings
@@ -8,6 +9,9 @@ from modules.downloader import Downloader
 
 
 async def main() -> None:
+    win = tk.Tk()
+    win.withdraw()
+
     auth_module = AuthModule()
 
     if (

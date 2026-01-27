@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from pydantic import BaseModel
 from pydantic_settings import (
@@ -40,6 +41,14 @@ class Settings(BaseSettings):
         env_file=".env",
         case_sensitive=False,
         env_nested_delimiter="__",
+    )
+
+
+def configure_logging() -> None:
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
     )
 
 

@@ -2,13 +2,15 @@ import asyncio
 import tkinter as tk
 
 from utils import ask
-from config import settings
 from modules.parser import Parser
 from modules.auth import AuthModule
 from modules.downloader import Downloader
+from config import settings, configure_logging
 
 
 async def main() -> None:
+    configure_logging()
+
     win = tk.Tk()
     win.withdraw()
 

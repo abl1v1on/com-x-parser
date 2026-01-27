@@ -29,8 +29,25 @@ class DownloaderSettings(BaseModel):
     download_dir: Path = get_download_folder()
 
 
+class DriverSettings(BaseModel):
+    chrome_options: list[str] = [
+        "--headless=new",
+        "--no-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
+        "--window-size=1920,1080",
+        "--disable-blink-features=AutomationControlled",
+        "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+    ]
+    chrome_experimental_options: list[tuple] = [
+        ("excludeSwitches", ["enable-automation"]),
+        ('useAutomationExtension', False),
+    ]
+
+
 class Settings(BaseSettings):
     login: LoginSettings
+    driver: DriverSettings = DriverSettings()
     downloader: DownloaderSettings = DownloaderSettings()
 
     @property

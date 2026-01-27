@@ -139,8 +139,9 @@ class Downloader:
     def _show_result(total: int) -> None:
         files_count = len(
             [
-                _ for _ in 
+                item for item in 
                 settings.downloader.download_dir.iterdir()
+                if item.is_file()
             ]
         )
         print(f"Установлено {files_count} из {total} файлов!")

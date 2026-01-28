@@ -143,10 +143,10 @@ class Downloader:
     @staticmethod
     async def _get_cookies() -> dict:
         async with aiofiles.open(
-            settings.login.cookies_path, 
+            settings.user_config, 
             mode="r",
         ) as file:
-            return json.loads(await file.read())
+            return json.loads(await file.read())["cookies"]
 
     @staticmethod
     def _get_filename(response: Response) -> str:

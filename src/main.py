@@ -14,12 +14,11 @@ async def main() -> None:
     win = tk.Tk()
     win.withdraw()
 
-    auth_module = AuthModule()
-
     if (
-        not settings.login.cookies_path.exists() 
+        not settings.user_config.exists() 
         or ask("Save cookies again?")
     ):
+        auth_module = AuthModule()
         await auth_module.save_auth_cookies()
 
     manga_url = str(input("Manga URL: "))

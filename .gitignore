@@ -8,8 +8,5 @@ wheels/
 
 # Virtual environments
 .venv
-.env
 
-cookies.json
-metadata
-downloads
+user-config.json

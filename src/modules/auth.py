@@ -62,16 +62,11 @@ class AuthModule:
 
     @staticmethod
     async def _write_cookies_to_file(cookies: dict) -> None:
-        if settings.user_config.exists():
-            async with aiofiles.open(
-                settings.user_config, 
-                mode="r",
-            ) as file:
-                user_config_obj = json.loads(
-                    await file.read(),
-                )
-        else:
-            user_config_obj = dict()
+        async with aiofiles.open(
+            settings.user_config, 
+            mode="r",
+        ) as file:
+            user_config_obj = json.loads(await file.read())
 
         async with aiofiles.open(
             settings.user_config, 

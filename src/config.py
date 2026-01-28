@@ -1,21 +1,14 @@
+import json
 import logging
 from pathlib import Path
+
 from pydantic import BaseModel
-from pydantic_settings import (
-    BaseSettings, 
-    SettingsConfigDict,
-)
+from pydantic_settings import BaseSettings
 
 from utils import get_download_folder
 
 
 BASE_DIR = Path(__file__).parent.parent
-
-
-class LoginSettings(BaseModel):
-    name: str
-    password: str
-    cookies_path: Path = BASE_DIR / "cookies.json"
 
 
 class DownloaderSettings(BaseModel):
@@ -46,19 +39,27 @@ class DriverSettings(BaseModel):
 
 
 class Settings(BaseSettings):
-    login: LoginSettings
     driver: DriverSettings = DriverSettings()
     downloader: DownloaderSettings = DownloaderSettings()
+
+    user_config: Path = BASE_DIR / 'user-config.json'
 
     @property
     def metadata_path(self) -> Path:
         return self.downloader.download_dir / "metadata"
 
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        case_sensitive=False,
-        env_nested_delimiter="__",
-    )
+    @property
+    def username(self) -> str:
+        return self._read_user_config("username")
+
+    @property
+    def password(self) -> str:
+        return self._read_user_config("password")
+
+    def _read_user_config(self, attr: str) -> str:
+        with open(self.user_config, mode="r") as f:
+            data =  json.loads(f.read())
+        return data[attr]
 
 
 def configure_logging() -> None:
